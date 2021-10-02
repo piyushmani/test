@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>{{ the_title }}</title>
+  <script src="https://code.highcharts.com/stock/highstock.js"></script>
+<script src="https://code.highcharts.com/stock/modules/data.js"></script>
+<script src="https://code.highcharts.com/stock/modules/exporting.js"></script>
+<script
+  src="https://code.jquery.com/jquery-3.6.0.min.js"
+  integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4="
+  crossorigin="anonymous"></script>
+</head>
+
+<body>
+
+
+  <div style="margin: 30px;" >
+    <div id="container" style="padding: 10px;"></div>
+  </div>
+
+
+</body>
+
+<script>
+    // Create the chart
+    var chart = Highcharts.stockChart('container', {
+          chart: {
+            events: {
+                load: function () {
+                  this.showLoading();
+                  get_data('1Y')
+                },
+                setExtremes: function(e) {
+                     chart.showLoading();
+                      get_data(Highcharts.dateFormat(null, e.min),Highcharts.dateFormat(null, e.max))
+                      return false
+                }
+        },
+      },
+        rangeSelector: {
+            allButtonsEnabled: true,
+            buttons: [{
+                type: 'hour',
+                count: 1,
+                text: '1H',
+                events: {
+                    click: function () {
+                      chart.showLoading();
+                      get_data(this.text)
+                      return false
+                    }
+                }
+            }, 
+            {
+                type: 'hour',
+                count: 4,
+                text: '4H',
+                events: {
+                    click: function () {
+                      chart.showLoading();
+                      get_data(this.text)
+                      return false
+                    }
+                }
+            }, {
+                type: 'day',
+                count: 1,
+                text: '1D',
+                events: {
+                    click: function () {
+                      chart.showLoading();
+                      get_data(this.text)
+                      return false
+                    }
+                }
+            }, {
+                type: 'week',
+                count: 1,
+                text: '1W',
+                events: {
+                    click: function () {
+                      chart.showLoading();
+                      get_data(this.text)
+                      return false
+                    }
+                }
+            }, {
+                type: 'month',
+                count: 1,
+                text: '1M',
+                events: {
+                    click: function () {
+                      chart.showLoading();
+                      get_data(this.text)
+                      return false
+                    }
+                }
+            }, {
+                type: 'year',
+                count: 1,
+                text: '1Y',
+                events: {
+                    click: function () {
+                      chart.showLoading();
+                      get_data(this.text)
+                      return false
+                    }
+                }
+            }]
+        },
+        navigator: {
+					enabled: false
+				},
+
+        title: {
+            text: 'Price History'
+        },
+
+        series: [{
+            name: 'BTC Price',
+            data: [],
+            tooltip: {
+                valueDecimals: 2
+            }
+        },
+        {
+            name: 'ETH Price',
+            data: [],
+            tooltip: {
+                valueDecimals: 2
+            }
+        }]
+    });
+
+
+    function get_data(param){
+
+
+      $.ajax({
+          type:"GET",
+          url: "/data",
+          data: {
+            param: param,
+          },
+          success: function(data){
+            var btc_data = [];
+            var eth_data = [];
+            data.btc_price.forEach(function (element) {   
+              btc_data.push([new Date(element.time*1000).getTime(),element.high])
+            });
+            data.eth_price.forEach(function (element) {   
+              eth_data.push([new Date(element.time*1000).getTime(),element.high])
+            });
+
+            var btc_series = chart.series[0];
+            var eth_series = chart.series[1];
+            btc_series.setData(btc_data,false);
+            eth_series.setData(eth_data,false);
+            chart.redraw();
+            chart.hideLoading();
+            
+
+          },
+          error: function (error) {
+            chart.hideLoading();
+          }
+        })  
+
+    }
+
+
+
+// Highcharts.getJSON('https://demo-live-data.highcharts.com/aapl-c.json', function (data) {
+//     // Create the chart
+//     Highcharts.stockChart('container', {
+//         rangeSelector: {
+//             buttons: [{
+//                 type: 'month',
+//                 count: 1,
+//                 text: '1m',
+//                 events: {
+//                     click: function () {
+//                         console.log(this);
+//                     }
+//                 }
+//             }, {
+//                 type: 'month',
+//                 count: 3,
+//                 text: '3m'
+//             }, {
+//                 type: 'month',
+//                 count: 6,
+//                 text: '6m'
+//             }, {
+//                 type: 'ytd',
+//                 text: 'YTD'
+//             }, {
+//                 type: 'year',
+//                 count: 1,
+//                 text: '1y'
+//             }, {
+//                 type: 'all',
+//                 text: 'All'
+//             }]
+//         },
+
+//         title: {
+//             text: 'AAPL Stock Price'
+//         },
+
+//         series: [{
+//             name: 'AAPL',
+//             data: data,
+//             tooltip: {
+//                 valueDecimals: 2
+//             }
+//         }]
+//     });
+// });
+
+</script>
+</html>
